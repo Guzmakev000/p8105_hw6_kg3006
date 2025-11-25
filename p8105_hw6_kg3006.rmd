@@ -18,6 +18,10 @@ homicides <- read_csv("https://raw.githubusercontent.com/washingtonpost/data-hom
 
 #Creating city, state variable using "city", "state" 
 homicides <- homicides %>%
-  mutate(city_state = paste(city, state, sep = ", "))
+  mutate(city_state = paste(city, state, sep = ", ")) %>% 
+  #Creating binary variable (solved v. not solved) from disposition column
+  mutate(solved = ifelse(disposition == "Closed by arrest", 1, 0)) 
+  
+
 ```
 
