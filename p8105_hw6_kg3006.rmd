@@ -1,0 +1,15 @@
+---
+title: "p8105_hw6_kg3006"
+author: "Kevin Guzman"
+date: "2025-11-25"
+output: github_document
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#Loading appropriate libraries 
+library(tidyverse)
+
+#Loading library from github website 
+homicides <- read_csv("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv")
+```
+
