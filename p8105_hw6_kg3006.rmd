@@ -145,6 +145,12 @@ Rates of homicides being solved differ by cities. The city with the highest adju
     tibble(r_squared = r2,
            beta1_beta2 = b1*b2)   
   }
+  
+  #Running 5000 boostrap samples 
+  bootstrap_results <- map_dfr(1:5000, 
+                               ~ bootstrap_function(weather_df, sample(1:nrow(weather_df), replace = TRUE)))
+  
+
 
 ```
 
