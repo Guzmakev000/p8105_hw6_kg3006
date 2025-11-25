@@ -40,8 +40,12 @@ homicides <- homicides %>%
   baltimore_glm <- glm(solved ~ victim_age + victim_sex + victim_race, 
                       data = baltimore_homicides,
                       family=binomial)
-  
+  #Saving as an R object 
   saveRDS(baltimore_glm, "Output/baltimore_glm.rds")
+  
+  #Getting adjusted odds ratios 
+  baltimore_glm %>% 
+    broom::tidy(exponentiate = TRUE, conf.int = TRUE)
     
 ```
 
