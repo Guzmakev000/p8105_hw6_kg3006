@@ -11,6 +11,7 @@ library(tidyverse)
 library(purrr)
 library(broom)
 library(p8105.datasets)
+library(gridExtra)
 ```
 
 ## Problem 1
@@ -119,7 +120,7 @@ Rates of homicides being solved differ by cities. The city with the highest adju
 
 ## Problem 2 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide', fig.width=8, fig.height=10}
 #Loading library from p8105.datasets 
   data("weather_df")
 
@@ -150,9 +151,42 @@ Rates of homicides being solved differ by cities. The city with the highest adju
   bootstrap_results <- map_dfr(1:5000, 
                                ~ bootstrap_function(weather_df, sample(1:nrow(weather_df), replace = TRUE)))
   
-
-
+  #Plotting results 
+  p1 <- ggplot(bootstrap_results, aes(x = r_squared)) +
+  geom_histogram(color = "white", fill = "gray40", bins = 40) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Bootstrap Distribution of R-squared",
+    x = expression(hat(R)^2),
+    y = "Frequency"
+  ) + 
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    axis.title = element_text(face = "bold"),
+    axis.text = element_text(color = "black")
+  )
+  
+  p2 <- ggplot(bootstrap_results, aes(x = beta1_beta2)) +
+  geom_histogram(color = "white", fill = "gray40", bins = 40) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Bootstrap Distribution of β1 × β2",
+    x = expression(hat(beta)[1] * hat(beta)[2]),
+    y = "Frequency"
+  ) + 
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    axis.title = element_text(face = "bold"),
+    axis.text = element_text(color = "black")
+  )
+  
+  
+  #Combine figures
+  grid.arrange(p1, p2, ncol = 1)
 ```
 
 
+The bootstrap distribution of R-squared shows that the R-squared values fall between `r round(min(bootstrap_results$r_squared), 3)` and `r round(max(bootstrap_results$r_squared), 3)`. The mean R-squared was `r round(mean(bootstrap_results$r_squared), 3)` (95% CI: `r round(quantile(bootstrap_results$r_squared, c(0.025, 0.975)),3)`) indicating that the model explains a substantial portion of the variance in maximum temperature (tmax).  The bootstrap distribution of β̂₁β̂₂ ranged from`r round(min(bootstrap_results$beta1_beta2), 3)` to `r round(max(bootstrap_results$beta1_beta2), 3)`. The mean value is `r round(mean(bootstrap_results$beta1_beta2), 3)` (95% CI: `r round(quantile(bootstrap_results$beta1_beta2, c(0.025, 0.975)),3)`). 
 
+
+## Problem 3
