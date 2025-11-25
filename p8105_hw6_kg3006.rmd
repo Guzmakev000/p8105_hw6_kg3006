@@ -21,8 +21,13 @@ homicides <- homicides %>%
   mutate(city_state = paste(city, state, sep = ", ")) %>% 
   #Creating binary variable (solved v. not solved) from disposition column
   mutate(solved = ifelse(disposition == "Closed by arrest", 1, 0)) %>% 
-  #Omiting city_states Dallas, Tx, Phoenix, AZ, and Kansas City, MO 
-  filter(!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO")))
+  #Omiting city_states Dallas, Tx, Phoenix, AZ, and Kansas City, MO for not reporting race 
+  filter(!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO"))) %>% 
+  #Omitting Tulsa, AL (entery mistake) 
+  filter(city_state != "Tulsa, AL") %>% 
+  #Only keeping those who are black or white race in victim_race
+  filter(victim_race==c("Black", "White")) 
+
 
 ```
 
