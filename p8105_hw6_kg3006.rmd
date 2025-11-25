@@ -112,3 +112,5 @@ In Balitmore, MD, the adjusted odds of a homicide being solved for Males are `r 
     plot1
 
 ```
+
+Rates of homicides being solved differ by cities. The city with the highest adjusted odds of a homicide being solved when the victim is male compared to female is `r city_odds_ratio$city_state[which.max(city_odds_ratio$estimate)]` with an adjusted odds ratio of `r round(max(city_odds_ratio$estimate), 2)` (95% CI: `r round(city_odds_ratio$conf.low[which.max(city_odds_ratio$estimate)], 2)` - `r round(city_odds_ratio$conf.high[which.max(city_odds_ratio$estimate)], 2)`). The city with the lowest adjusted odds of a homicide being solved when the victim is male compared to female is `r city_odds_ratio$city_state[which.min(city_odds_ratio$estimate)]` with an adjusted odds ratio of `r round(min(city_odds_ratio$estimate), 2)` (95% CI: `r round(city_odds_ratio$conf.low[which.min(city_odds_ratio$estimate)], 2)` - `r round(city_odds_ratio$conf.high[which.min(city_odds_ratio$estimate)], 2)`).
