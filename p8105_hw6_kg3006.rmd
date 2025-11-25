@@ -126,6 +126,25 @@ Rates of homicides being solved differ by cities. The city with the highest adju
 #Viewing 
   head(weather_df)
 
+#5000 bootstraps of model 
+  #setting seed
+  set.seed(123)
+  
+  #making function for bootstrap 
+  bootstrap_function <- function(data, indices) {
+    d <- data[indices, ] # Resample the data
+    model <- lm(tmax ~ tmin + prcp, data = d)
+    #Extract r^2
+    r2 <- glance(model)$r.squared
+    
+    #extract coefficients
+    coefs <- tidy(model)
+    b1 <- coefs$estimate[coefs$term == "tmin"]
+    b2 <- coefs$estimate[coefs$term == "prcp"]
+    
+    tibble(r_squared = r2,
+           beta1_beta2 = b1*b2)   
+  }
 
 ```
 
