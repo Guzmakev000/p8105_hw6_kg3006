@@ -71,6 +71,14 @@ In Balitmore, MD, the adjusted odds of a homicide being solved for Males are `r 
     #Getting adjusted odds ratios for each city
     tidy = map(model, ~ broom::tidy(.x, exponentiate = TRUE, conf.int = TRUE))) %>% 
     select(city_state, tidy) %>% 
-    unnest(cols = c(tidy))
+    unnest(cols = c(tidy)) %>% 
+    #Filtering for victim_sexMale term only
+    filter(term == "victim_sexMale") %>% 
+    #Only keep estimates and OR high and low 
+    select(city_state, estimate, conf.low, conf.high) %>%
+    #Arranging in descending order of odds ratio
+    arrange(desc(estimate))
+  
+
       
 ```
