@@ -12,7 +12,7 @@ library(tidyverse)
 
 ## Problem 1
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
 #Loading library from github website 
 homicides <- read_csv("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv")
 
@@ -49,3 +49,6 @@ homicides <- homicides %>%
     
 ```
 
+### Comparing solving crimes in males v. females in Baltimore, MD
+
+In Balitmore, MD, the adjusted odds of a homicide being solved for Males are `r round( (baltimore_glm %>% broom::tidy(exponentiate = TRUE, conf.int = TRUE) %>% filter(term == "victim_sexMale"))$estimate, 2)` (95% CI: `r round( (baltimore_glm %>% broom::tidy(exponentiate = TRUE, conf.int = TRUE) %>% filter(term == "victim_sexMale"))$conf.low, 2)` - `r round( (baltimore_glm %>% broom::tidy(exponentiate = TRUE, conf.int = TRUE) %>% filter(term == "victim_sexMale"))$conf.high, 2)`) times the odds for female victime, holding all other variables constant.
