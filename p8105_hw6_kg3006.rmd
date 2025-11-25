@@ -29,8 +29,11 @@ homicides <- homicides %>%
   filter(victim_race==c("Black", "White")) %>% 
   #Changing age to nmeric 
   mutate(victim_age = as.numeric(victim_age)) 
+```
 
-
+### Comparing solving crimes in males v. females in Baltimore, MD
+ 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
 #Baltiomore Analysis 
   #Filtering for Baltimore, MD to new dataset
   baltimore_homicides <- homicides %>%
@@ -46,9 +49,28 @@ homicides <- homicides %>%
   #Getting adjusted odds ratios 
   baltimore_glm %>% 
     broom::tidy(exponentiate = TRUE, conf.int = TRUE)
-    
 ```
 
-### Comparing solving crimes in males v. females in Baltimore, MD
-
 In Balitmore, MD, the adjusted odds of a homicide being solved for Males are `r round( (baltimore_glm %>% broom::tidy(exponentiate = TRUE, conf.int = TRUE) %>% filter(term == "victim_sexMale"))$estimate, 2)` (95% CI: `r round( (baltimore_glm %>% broom::tidy(exponentiate = TRUE, conf.int = TRUE) %>% filter(term == "victim_sexMale"))$conf.low, 2)` - `r round( (baltimore_glm %>% broom::tidy(exponentiate = TRUE, conf.int = TRUE) %>% filter(term == "victim_sexMale"))$conf.high, 2)`) times the odds for female victime, holding all other variables constant.
+
+### All cities 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+# Making helper for logistic regression model 
+  #City helper function glm 
+  city_glm <- function(city_name){
+    data <- homicides %>%
+      filter(city_state == city_name)
+    
+    glm(solved ~ victim_age + victim_sex + victim_race, 
+        data = data,
+        family=binomial)
+  }
+# Getting list of unique city_states
+  city_list <- unique(homicides$city_state)
+# Applying city_glm function to each city in city_list
+  city_models <- lapply(city_list, city_glm)
+# Naming each model in city_models with corresponding city name from city_list
+  names(city_models) <- city_list
+#
+```
