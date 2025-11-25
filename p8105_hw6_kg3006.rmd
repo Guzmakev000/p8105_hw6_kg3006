@@ -26,11 +26,22 @@ homicides <- homicides %>%
   #Omitting Tulsa, AL (entery mistake) 
   filter(city_state != "Tulsa, AL") %>% 
   #Only keeping those who are black or white race in victim_race
-  filter(victim_race==c("Black", "White")) 
+  filter(victim_race==c("Black", "White")) %>% 
+  #Changing age to nmeric 
+  mutate(victim_age = as.numeric(victim_age)) 
+
 
 #Baltiomore Analysis 
   #Filtering for Baltimore, MD to new dataset
   baltimore_homicides <- homicides %>%
     filter(city_state == "Baltimore, MD")
+  
+  #Logistic regression model predicting whether homicide is solved based on victim age, sex, and race as predictors 
+  baltimore_glm <- glm(solved ~ victim_age + victim_sex + victim_race, 
+                      data = baltimore_homicides,
+                      family=binomial)
+  
+  saveRDS(baltimore_glm, "Output/baltimore_glm.rds")
+    
 ```
 
