@@ -8,6 +8,7 @@ output: github_document
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #Loading appropriate libraries 
 library(tidyverse)
+library(purrr)
 ```
 
 ## Problem 1
@@ -56,21 +57,20 @@ In Balitmore, MD, the adjusted odds of a homicide being solved for Males are `r 
 ### All cities 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
-# Making helper for logistic regression model 
-  #City helper function glm 
-  city_glm <- function(city_name){
-    data <- homicides %>%
-      filter(city_state == city_name)
-    
-    glm(solved ~ victim_age + victim_sex + victim_race, 
-        data = data,
-        family=binomial)
-  }
-# Getting list of unique city_states
-  city_list <- unique(homicides$city_state)
-# Applying city_glm function to each city in city_list
-  city_models <- lapply(city_list, city_glm)
-# Naming each model in city_models with corresponding city name from city_list
-  names(city_models) <- city_list
-#
+# Making odds ratio for each city using purr and piplein 
+  city_odds_ratio <- homicides %>% 
+    #Group by city_state 
+    group_by(city_state) %>% 
+    #Nest data
+    nest() %>% 
+    #Creating function to run logistic regression for each city
+    mutate(
+      model = map(data, ~ glm(solved ~ victim_age + victim_sex + victim_race,
+                              data = .x,
+                              family = binomial)),
+    #Getting adjusted odds ratios for each city
+    tidy = map(model, ~ broom::tidy(.x, exponentiate = TRUE, conf.int = TRUE))) %>% 
+    select(city_state, tidy) %>% 
+    unnest(cols = c(tidy))
+      
 ```
