@@ -20,8 +20,9 @@ homicides <- read_csv("https://raw.githubusercontent.com/washingtonpost/data-hom
 homicides <- homicides %>%
   mutate(city_state = paste(city, state, sep = ", ")) %>% 
   #Creating binary variable (solved v. not solved) from disposition column
-  mutate(solved = ifelse(disposition == "Closed by arrest", 1, 0)) 
-  
+  mutate(solved = ifelse(disposition == "Closed by arrest", 1, 0)) %>% 
+  #Omiting city_states Dallas, Tx, Phoenix, AZ, and Kansas City, MO 
+  filter(!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO")))
 
 ```
 
