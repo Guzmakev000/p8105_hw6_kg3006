@@ -28,6 +28,9 @@ homicides <- homicides %>%
   #Only keeping those who are black or white race in victim_race
   filter(victim_race==c("Black", "White")) 
 
-
+#Baltiomore Analysis 
+  #Filtering for Baltimore, MD to new dataset
+  baltimore_homicides <- homicides %>%
+    filter(city_state == "Baltimore, MD")
 ```
 
