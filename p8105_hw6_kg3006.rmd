@@ -190,3 +190,58 @@ The bootstrap distribution of R-squared shows that the R-squared values fall bet
 
 
 ## Problem 3
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+#Loading CSV dataset from Files
+  birthweight <- read_csv("Files/birthweight.csv") %>% 
+  #Sex as factor 1 = Male, 2 = Female
+  mutate(babysex = factor(babysex, levels = c(1, 2), labels = c("Male", "Female"))) %>% 
+  #frace :father’s race (1 = White, 2 = Black, 3 = Asian, 4 = Puerto Rican, 8 = Other, 9 = Unknown)
+  mutate(frace = factor(frace, levels = c(1, 2, 3, 4, 8, 9), 
+                        labels = c("White", "Black", "Asian", "Puerto Rican", "Other", "Unknown"))) %>% 
+  #malform : presence of any malformation (0 = absent, 1 = present)
+  mutate(malform = factor(malform, levels = c(0, 1), labels = c("Absent", "Present"))) %>% 
+  #mrace: (1 = White, 2 = Black, 3 = Asian, 4 = Puerto Rican, 8 = Other)
+  mutate(mrace = factor(mrace, levels = c(1, 2, 3, 4, 8), 
+                        labels = c("White", "Black", "Asian", "Puerto Rican", "Other"))) %>% 
+  rename(
+    baby_sex = babysex,
+    baby_head_cm = bhead,
+    baby_length_cm = blength,
+    baby_weight_g = bwt,
+    mothers_delivery_weight_lb = delwt,
+    family_income = fincome,
+    fathers_race = frace,
+    gestation_week = gaweeks,
+    malformation = malform,
+    mothers_age_menarche = menarche,
+    mothers_height_inches = mheight,
+    mothers_delivery_age = momage, 
+    mothers_race = mrace, 
+    prior_births = parity,
+    prior_low_birthweight = pnumlbw,
+    prior_small_gestation = pnumsga,
+    mothers_pre_preg_BMI = ppbmi,
+    mothers_pre_preg_wegith_lb = ppwt,
+    cigarette_preganancy = smoken,
+    preganancy_wt_gain_lb = wtgain
+  ) %>% 
+  #change pounds to kg
+    mutate(mothers_delivery_weight_kg = mothers_delivery_weight_lb * 0.453592,
+           mothers_pre_preg_weight_kg = mothers_pre_preg_wegith_lb * 0.453592,
+           pregnancy_wt_gain_kg = preganancy_wt_gain_lb * 0.453592) %>%
+  #change inches to cm
+    mutate(mothers_height_cm = mothers_height_inches * 2.54) %>%
+  #change g to kg 
+    mutate(baby_weight_kg = baby_weight_g / 1000) %>%
+  #Remove old variables
+    select(-c(mothers_delivery_weight_lb, preganancy_wt_gain_lb, mothers_pre_preg_wegith_lb, mothers_height_inches, baby_weight_g))
+
+
+  
+    
+
+
+
+```
+
