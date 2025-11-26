@@ -12,6 +12,7 @@ library(purrr)
 library(broom)
 library(p8105.datasets)
 library(gridExtra)
+library(modelr)
 ```
 
 ## Problem 1
@@ -232,16 +233,52 @@ The bootstrap distribution of R-squared shows that the R-squared values fall bet
            pregnancy_wt_gain_kg = preganancy_wt_gain_lb * 0.453592) %>%
   #change inches to cm
     mutate(mothers_height_cm = mothers_height_inches * 2.54) %>%
-  #change g to kg 
-    mutate(baby_weight_kg = baby_weight_g / 1000) %>%
+  #creating a smoking yes/no variable if cigarette_pregnancy is >0 
+    mutate(smoking_preganancy = ifelse(cigarette_preganancy > 0, "Yes", "No")) %>%
   #Remove old variables
-    select(-c(mothers_delivery_weight_lb, preganancy_wt_gain_lb, mothers_pre_preg_wegith_lb, mothers_height_inches, baby_weight_g))
+    select(-c(mothers_delivery_weight_lb, preganancy_wt_gain_lb, mothers_pre_preg_wegith_lb, mothers_height_inches))
 
+#Missing values all 
+colSums(is.na(birthweight)) # there are no missing avlues in any of them 
 
+#Fitting linear regression model based on baby's birth adjusting for baby's sex, family income, gestation week, malformations, mothers pre-preg BMI, and cigarette use during pregnancy
+baby_weigth <- glm(baby_weight_g ~ baby_sex + family_income + gestation_week + malformation + 
+        mothers_pre_preg_BMI + smoking_preganancy,
+      data = birthweight)
+  #Looking at output 
+  summary(baby_weigth)
   
-    
-
-
-
+  #Getting dataframe with estimate and CI
+  baby_weigth_results <- baby_weigth %>% 
+    broom::tidy(conf.int = TRUE) %>% 
+    #Selecting columns I will use 
+    select(term, estimate, conf.low, conf.high)
 ```
+
+In problem number 3, I think a good hypothesis tot have is that the baby's birth weight is effected by the amount the mother smokes during pregnancy. From the results of the linear regression model, we can see that when adjusting for other variables, mothers who smoked during pregnancy had babies that weighed on average `r round(baby_weigth_results$estimate[baby_weigth_results$term == "smoking_preganancyYes"], 2)` grams (95% CI: `r round(baby_weigth_results$conf.low[baby_weigth_results$term == "smoking_preganancyYes"], 2)`, `r round(baby_weigth_results$conf.high[baby_weigth_results$term == "smoking_preganancyYes"], 2)`) less compared to mothers who did not smoke during pregnancy, after adjusting for the baby's sex, the family income, the gestation weeks at birth, the presence of malformation, and the mother's BMI prior to pregnancy. This suggests that smoking during pregnancy has a negative impact on baby's birth weight.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide', fig.width=8, fig.height=6}
+#Making residual plot
+# Add fitted values and residuals to the dataset
+birthweight_resid <- birthweight %>% 
+  select(baby_weight_g, baby_sex, family_income, gestation_week, malformation, 
+        mothers_pre_preg_BMI, smoking_preganancy) %>% 
+  add_predictions(baby_weigth) %>% 
+  add_residuals(baby_weigth)
+
+# Plot residuals vs fitted values
+birthweight_resid %>% 
+  ggplot(aes(x = pred, y = resid)) +
+  geom_point(alpha = 0.4) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    x = "Fitted values (predicted birthweight, grams)",
+    y = "Residuals",
+    title = "Residuals vs Fitted Values for Birthweight Model"
+  ) +
+  theme_minimal()
+```
+
+The residual plot shows a random scatter of points around the horizontal line at zero, indicating that the linear regression model is appropriate for the data. There is no clear pattern in the residuals, suggesting that the assumptions of linearity and homoscedasticity are met. This supports the validity of the conclusions drawn from the model regarding the impact of smoking during pregnancy on baby's birth weight.
+
 
