@@ -281,4 +281,62 @@ birthweight_resid %>%
 
 The residual plot shows a random scatter of points around the horizontal line at zero, indicating that the linear regression model is appropriate for the data. There is no clear pattern in the residuals, suggesting that the assumptions of linearity and homoscedasticity are met. This supports the validity of the conclusions drawn from the model regarding the impact of smoking during pregnancy on baby's birth weight.
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+#Formulas to compare 
+model1_formula <- baby_weight_g ~ baby_sex + family_income + gestation_week + malformation + 
+        mothers_pre_preg_BMI + smoking_preganancy
+model2_formula <- baby_weight_g ~ baby_length_cm + gestation_week
+model3_formula <- baby_weight_g ~ baby_head_cm * baby_length_cm * baby_sex
 
+#Cross validation 
+set.seed(123)
+  cv_folds <- crossv_mc(birthweight, n = 100, test = 0.20)
+  
+#RMSE calculation 
+  rmse_fun <- function(fit, test_data) {
+  preds <- predict(fit, newdata = test_data)
+  sqrt(mean((test_data$baby_weight_g - preds)^2))
+}
+
+#Fitting model 
+cv_fits <- cv_folds %>%
+  mutate(
+    fit1 = map(train, ~ glm(model1_formula, data = as.data.frame(.x))),
+    fit2 = map(train, ~ glm(model2_formula, data = as.data.frame(.x))),
+    fit3 = map(train, ~ glm(model3_formula, data = as.data.frame(.x)))
+  ) %>%
+  # Compute RMSE on the test set for each model
+  mutate(
+    rmse1 = map2_dbl(fit1, test, ~ rmse_fun(.x, as.data.frame(.y))),
+    rmse2 = map2_dbl(fit2, test, ~ rmse_fun(.x, as.data.frame(.y))),
+    rmse3 = map2_dbl(fit3, test, ~ rmse_fun(.x, as.data.frame(.y)))
+  )
+
+rmse_long <- cv_fits %>%
+  select(rmse1, rmse2, rmse3) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "model",
+    values_to = "rmse"
+  ) %>%
+  mutate(
+    model = recode(
+      model,
+      rmse1 = "Model 1: full (sex + income + gestation + BMI + malformation + smoking)",
+      rmse2 = "Model 2: length + gestation",
+      rmse3 = "Model 3: head*length*sex (all interactions)"
+    )
+  )
+
+rmse_summary <- rmse_long %>%
+  group_by(model) %>%
+  summarise(
+    mean_rmse = mean(rmse),
+    sd_rmse   = sd(rmse),
+    .groups = "drop"
+  )
+
+rmse_summary
+```
+
+Comparing my modle to the two additional model, my model explained the data worse based on the cross-validated RMSE. My model (Model 1) had a mean RMSE of `r round(rmse_summary$mean_rmse[rmse_summary$model == "Model 1: full (sex + income + gestation + BMI + malformation + smoking)"], 2)` with a standard deviation of `r round(rmse_summary$sd_rmse[rmse_summary$model == "Model 1: full (sex + income + gestation + BMI + malformation + smoking)"], 2)`. Model 2 had a higher mean RMSE of `r round(rmse_summary$mean_rmse[rmse_summary$model == "Model 2: length + gestation"], 2)` and Model 3 had the highest mean RMSE of `r round(rmse_summary$mean_rmse[rmse_summary$model == "Model 3: head*length*sex (all interactions)"], 2)`. This indicates that my model provides worse predictive accuracy for baby's birth weight compared to the other two models.
